@@ -190,3 +190,54 @@ FULL JOIN currencies AS c2
 USING(code)
 WHERE region LIKE 'M%esia';
 -- The first FULL JOIN in the query pulled countries and languages, and the second FULL JOIN added in currency data for each record in the result of the first FULL JOIN
+
+
+-- INNER JOIN
+SELECT c.name AS country, l.name AS language
+-- Inner join countries as c with languages as l on code
+FROM countries AS c
+INNER JOIN languages AS l
+USING(code)
+WHERE c.code IN ('PAK','IND')
+	AND l.code in ('PAK','IND');
+
+-- Cross Join
+SELECT c.name AS country, l.name AS language
+FROM countries AS c        
+CROSS JOIN languages as l
+WHERE c.code in ('PAK','IND')
+	AND l.code in ('PAK','IND');
+
+
+SELECT 
+	c.name AS country,
+    region,
+    life_expectancy AS life_exp
+FROM countries AS c
+INNER JOIN populations as p 
+ON c.code = p.country_code
+WHERE year = 2010
+ORDER BY life_exp 
+LIMIT 5;
+
+
+SELECT 
+    p1.country_code,
+    p1.size AS size2010,
+    p2.size AS size2015
+FROM populations as p1
+INNER JOIN populations as p2
+USING (country_code);
+
+
+SELECT 
+	p1.country_code, 
+    p1.size AS size2010, 
+    p2.size AS size2015
+FROM populations AS p1
+INNER JOIN populations AS p2
+ON p1.country_code = p2.country_code
+WHERE p1.year = 2010
+    AND p1.year = p2.year - 5;
+
+
