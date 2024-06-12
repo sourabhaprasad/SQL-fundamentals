@@ -241,3 +241,123 @@ WHERE p1.year = 2010
     AND p1.year = p2.year - 5;
 
 
+SELECT *
+FROM economies2015
+UNION
+SELECT *
+FROM economies2019
+ORDER BY code, year;
+
+
+SELECT code, year
+FROM economies
+UNION
+SELECT country_code, year
+FROM populations
+ORDER BY code, year;
+
+
+SELECT code, year
+FROM economies
+UNION ALL
+SELECT country_code, year
+FROM populations
+ORDER BY code, year;
+
+
+-- Return all cities with the same name as a country
+SELECT name
+FROM cities
+INTERSECT
+SELECT name 
+FROM countries;
+
+
+-- Return all cities that do not have the same name as a country
+SELECT name
+FROM cities
+EXCEPT
+SELECT name
+FROM countries
+ORDER BY name;
+--  Note that if countries had been on the left and cities on the right, you would have returned the opposite: all countries that do not have the same name as a city.
+
+
+-- Select country code for countries in the Middle East
+SELECT code 
+FROM countries
+WHERE name IN 
+    (
+        SELECT name
+        FROM countries
+        WHERE region LIKE '%Middle East'
+    )
+
+
+SELECT DISTINCT name
+FROM languages
+WHERE code IN
+    (SELECT code
+    FROM countries
+    WHERE region = 'Middle East')
+ORDER BY name;
+
+
+-- Select code and name of countries from Oceania
+SELECT code, name
+FROM countries
+WHERE continent = 'Oceania';
+
+-- ANIT JOIN
+SELECT code, name
+FROM countries
+WHERE continent = 'Oceania'
+-- Filter for countries not included in the bracketed subquery
+  AND code NOT IN 
+    (SELECT code
+    FROM currencies);
+--  The anti join determined which five out of 19 countries that were not included in the INNER JOIN provided. Did you notice that Tuvalu has two currencies, and therefore shows up twice in the INNER JOIN? This is why the INNER JOIN returned 15 rather than 14 results.
+
+
+SELECT *
+FROM populations
+-- Filter for only those populations where life expectancy is 1.15 times higher than average
+WHERE life_expectancy > 1.15 *
+  (SELECT AVG(life_expectancy)
+   FROM populations
+   WHERE year = 2015) 
+    AND year = 2015;
+
+
+
+SELECT name, country_code, urbanarea_pop
+FROM cities
+-- Filter using a subquery on the countries table
+WHERE name IN
+  (SELECT capital
+   FROM countries)
+ORDER BY urbanarea_pop DESC;
+
+
+
+
+SELECT countries.name AS country,
+    COUNT(cities.country_code) AS cities_num
+FROM countries
+LEFT JOIN cities 
+ON countries.code = cities.country_code
+GROUP BY countries.name
+ORDER BY cities_num DESC, 
+    country ASC
+LIMIT 9;
+
+
+
+SELECT countries.name AS country,
+-- Subquery that provides the count of cities   
+  (SELECT COUNT(cities.country_code)
+   FROM cities
+   WHERE cities.country_code = countries.code) AS cities_num
+FROM countries
+ORDER BY cities_num DESC, country
+LIMIT 9;

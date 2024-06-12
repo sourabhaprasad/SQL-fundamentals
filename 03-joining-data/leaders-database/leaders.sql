@@ -115,3 +115,82 @@ UNION ALL
 SELECT prime_minister, country
 FROM prime_ministers
 ORDER BY country, leader;
+
+
+-- CROSS JOIN
+SELECT prime_minister, president
+FROM prime_ministers as pm
+CROSS JOIN presidents as p
+WHERE pm.continent IN ('Asia')
+    AND p.continent IN ('South America');
+
+
+-- INTERSECT - countries with both prime minister and president
+SELECT country as intersect_country
+FROM prime_ministers 
+INTERSECT
+SELECT country
+FROM presidents;
+
+SELECT country as intersect_country, prime_minister as leader
+FROM prime_ministers 
+INTERSECT
+SELECT country, president
+FROM presidents;
+-- INTERSECT requires data from both fields in the left table to match their corresponding fields in the right table.
+
+
+SELECT country as country, prime_minister as leader
+FROM prime_ministers 
+INTERSECT
+SELECT country, monarch
+FROM monarchs;
+
+
+-- MONARCHS that do not hold the title of prime minister
+SELECT monarch , country
+FROM monarchs
+EXCEPT
+SELECT prime_minister, country
+FROM prime_ministers;
+
+
+-- SEMI JOINS
+SELECT president, country, continent
+FROM presidents
+WHERE country IN 
+    (
+        SELECT country
+        FROM states
+        WHERE indep_year < 1800
+    );
+
+
+-- ANTI JOINS > chooses records in the first table where col1 does NOT find a match in col2
+SELECT president, country
+FROM presidents
+WHERE continent LIKE '%America'
+    AND country NOT IN
+    (
+        SELECT country
+        FROM states
+        WHERE indep_year < 1800
+    );
+
+SELECT DISTINCT continent
+FROM states;
+
+
+SELECT DISTINCT continent,
+    (
+        SELECT count(*)
+        FROM monarchs
+        WHERE states.continent = monarchs.continent
+    ) AS monarch_count
+FROM states;
+
+
+
+SELECT continent, MAX(indep_year) AS most_recent
+FROM states
+GROUP BY continent;
