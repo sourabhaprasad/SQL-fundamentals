@@ -193,4 +193,20 @@ FROM states;
 
 SELECT continent, MAX(indep_year) AS most_recent
 FROM states
-GROUP BY continent;
+GROUP BY continent
+
+
+SELECT DISTINCT monarchs.continent, sub.most_recent
+FROM monarchs,
+    (
+        SELECT
+            continent,
+            MAX(indep_year) AS most_recent
+            FROM states
+            GROUP BY continent
+    ) AS sub
+WHERE monarchs.continent = sub.continent
+ORDER BY continent;
+
+
+
