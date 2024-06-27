@@ -205,3 +205,4 @@ FROM country AS c
 LEFT JOIN matches AS m
 ON c.id = m.country_id
 GROUP BY country;
+
