@@ -30,3 +30,98 @@ FROM (
   ORDER BY Year ASC
 ) AS Years
 ORDER BY Year ASC;
+
+
+SELECT 
+  year, event, country,
+  ROW_NUMBER() OVER (ORDER BY Year DESC) AS Row_N
+FROM olympics 
+WHERE 
+  Medal = 'Gold';
+
+
+SELECT 
+  year, event, country,
+  ROW_NUMBER() OVER 
+    (ORDER BY year DESC, event ASC) AS Row_N
+FROM olympics
+WHERE 
+  medal = 'Gold';
+
+
+
+-- ORDERING BOTH INSIDE AND OUTSIDE AT THE SAME TIME
+SELECT 
+  year, event, country,
+  ROW_NUMBER() OVER 
+    (ORDER BY year DESC, event ASC) AS Row_N
+FROM olympics
+WHERE 
+  medal = 'Gold'
+ORDER BY country asc, Row_N asc;
+
+
+SELECT *
+FROM olympics;
+-------------------------------------
+-- LAG Window Function
+SELECT
+  year, country as champion
+FROM olympics
+WHERE 
+  gender = 'Men' AND medal = 'Gold'
+  AND event = 'Discus Throw';
+
+
+-- COMMON TABLE EXPRESSIONS
+WITH Discus_Gold AS (
+  SELECT
+    year, country as champion
+  FROM olympics
+  WHERE
+    year IN (1996,2000,2004,2008,2012)
+    AND gender = 'Men' AND medal = 'Gold' AND event = 'Discus Throw')
+
+
+SELECT 
+  year, champion,
+  LAG(Champion, 1) OVER
+  (ORDER BY Year ASC) AS Last_Champion
+FROM Discus_Gold
+ORDER BY year asc;
+----------------------------------------------
+WITH Athlete_Medals AS (
+  SELECT
+    -- Count the number of medals each athlete has earned
+    Athlete,
+    COUNT(*) AS Medals
+  FROM olympics
+  GROUP BY Athlete)
+
+SELECT
+  -- Number each athlete by how many medals they've earned
+  athlete,
+  ROW_NUMBER() OVER (ORDER BY medals DESC) AS Row_N
+FROM Athlete_Medals
+ORDER BY Medals DESC;
+---------------------------------------------
+WITH Weightlifting_Gold AS (
+  SELECT
+    -- Return each year's champions' countries
+    Year,
+    Country AS champion
+  FROM olympics
+  WHERE
+    Discipline = 'Weightlifting' AND
+    Event = '69KG' AND
+    Gender = 'Men' AND
+    Medal = 'Gold')
+
+SELECT
+  Year, Champion,
+  -- Fetch the previous year's champion
+  LAG(Champion) OVER
+    (ORDER BY Year ASC) AS Last_Champion
+FROM Weightlifting_Gold
+ORDER BY Year ASC;
+----------------------------------------------------
