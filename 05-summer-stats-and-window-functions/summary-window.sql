@@ -125,3 +125,62 @@ SELECT
 FROM Weightlifting_Gold
 ORDER BY Year ASC;
 ----------------------------------------------------
+-- PARTITION BY
+
+WITH Discus_Gold AS (
+  SELECT
+    -- Return each year's champions' countries
+    Year,
+    Event,
+    Country AS champion
+  FROM olympics
+  WHERE
+    Year in (2004, 2008, 2012)
+    AND Gender = 'Men' AND Medal = 'Gold'
+    AND Event in ('Discus Throw','Triple Jump'))
+
+SELECT
+  Year,Event, Champion,
+  -- Fetch the previous year's champion
+  LAG(Champion) OVER
+    (ORDER BY Event ASC, Year ASC) AS Last_Champion
+FROM Discus_Gold
+ORDER BY Event ASC, Year ASC;
+-- When event changes from Discus to Triple Jump, LAG fetched Discus Throw's last champion as opposed to null.
+----------------------------------
+
+WITH Discus_Gold AS (
+  SELECT
+    -- Return each year's champions' countries
+    Year,
+    Event,
+    Country AS champion
+  FROM olympics
+  WHERE
+    Year in (2004, 2008, 2012)
+    AND Gender = 'Men' AND Medal = 'Gold'
+    AND Event in ('Discus Throw','Triple Jump'))
+
+SELECT
+  Year,Event, Champion,
+  -- Fetch the previous year's champion
+  LAG(Champion) OVER
+    (PARTITION BY Event
+      ORDER BY Event ASC, Year ASC) AS Last_Champion
+FROM Discus_Gold
+ORDER BY Event ASC, Year ASC;
+----------------------------------
+WITH Country_Gold AS (
+  SELECT
+    DISTINCT Year, Country, Event
+  From olympics
+  WHERE 
+    YEAR IN (2008,2012)
+    AND Country IN ('CHN','JPN')
+    AND Gender = 'Women' AND Medal = 'Gold'
+)
+
+SELECT
+  Year, Country, event,
+   ROW_NUMBER() OVER (PARTITION BY Year, Country)
+  FROM Country_Gold;
